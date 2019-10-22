@@ -4,6 +4,11 @@
   {% for post in posts %}
     <p>{{post.user.username}}</p>
     <p>{{post.title}}</p>
+    {% if user in post.like_users.all %}
+      <a href="{% url 'posts:like' post.id %}">좋아요취소</a>
+    {% else %}
+      <a href="{% url 'posts:like' post.id %}">좋아요</a>
+    {% endif %}
     <hr>
   {% endfor %}
 {% endblock %}
