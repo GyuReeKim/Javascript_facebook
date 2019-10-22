@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
 {% block body %}
   <h1>인덱스</h1>
+  {% for post in posts %}
+    <p>{{post.user.username}}</p>
+    <p>{{post.title}}</p>
+    <hr>
+  {% endfor %}
 {% endblock %}
