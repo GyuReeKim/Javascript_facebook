@@ -4,11 +4,92 @@
   {% for post in posts %}
     <p>{{post.user.username}}</p>
     <p>{{post.title}}</p>
+    <p><span id="post-{{post.id}}">{{post.like_users.count}}</span>명이 좋아요를 눌렀습니다.</p>
     {% if user in post.like_users.all %}
-      <a href="{% url 'posts:like' post.id %}">좋아요취소</a>
+      <i class="fas fa-heart" data-id="{{post.id}}"></i>
+      <!-- <span data-id="{{post.id}}">좋아요취소</span> -->
     {% else %}
-      <a href="{% url 'posts:like' post.id %}">좋아요</a>
+      <i class="far fa-heart" data-id="{{post.id}}"></i>
+      <!-- <span data-id="{{post.id}}">좋아요</span> -->
     {% endif %}
     <hr>
   {% endfor %}
+
+  <script>
+    const likeBtns = document.querySelectorAll('.fa-heart')
+    console.log(likeBtns)
+    likeBtns.forEach((btn)=>{
+      // console.log(btn)
+      btn.addEventListener('click', (e)=>{
+        console.log(e.target.classList)
+        const postId = e.target.dataset.id
+        // e.target.innerText = '좋아요 클릭!!!!'
+        // e.target.classList.remove('far')
+        // e.target.classList.add('fas')
+        console.log(postId)
+
+        // POST 방식
+        // csrf_token
+        axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
+        axios.defaults.xsrfCookieName = 'csrftoken'
+        axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+        
+        // 장고에게 좋아요 요청을 보낸다.
+        axios.post(`/posts/${postId}/like/`)
+        // 그 응답에 따라서
+          .then((response)=>{
+            //console.log(response.data.is_like)
+            console.log(response.data)
+            
+            // 여기서 querySelector를 사용하면 첫번째 데이터만 가져오기 때문에 아래의 숫자가 변경되지 않는다.
+            // document.querySelector('span').innerText = response.data.likes_count
+
+            // 아래의 방법으로 하면 비효율적이다.
+            // document.querySelectorAll('span')[postId-1].innerText = response.data.likes_count
+
+            // 몇명이 좋아요를 눌렀는지 바꿔준다.
+            document.querySelector(`#post-${postId}`).innerText = response.data.likes_count
+
+            if (response.data.is_like){ // is_like == True이므로 하트를 비워진 상태에서 채워진 상태로 바꾼다.
+              e.target.classList.remove('far')
+              e.target.classList.add('fas')
+            } else{
+              e.target.classList.remove('fas')
+              e.target.classList.add('far')
+            }
+          })
+          .catch((error)=>{console.log(error)})
+
+
+        /*
+        // GET 방식
+        // 장고에게 좋아요 요청을 보낸다.
+        axios.get(`/posts/${postId}/like/`)
+        // 그 응답에 따라서
+          .then((response)=>{
+            //console.log(response.data.is_like)
+            console.log(response.data)
+            
+            // 여기서 querySelector를 사용하면 첫번째 데이터만 가져오기 때문에 아래의 숫자가 변경되지 않는다.
+            // document.querySelector('span').innerText = response.data.likes_count
+
+            // 아래의 방법으로 하면 비효율적이다.
+            // document.querySelectorAll('span')[postId-1].innerText = response.data.likes_count
+
+            // 몇명이 좋아요를 눌렀는지 바꿔준다.
+            document.querySelector(`#post-${postId}`).innerText = response.data.likes_count
+
+            if (response.data.is_like){ // is_like == True이므로 하트를 비워진 상태에서 채워진 상태로 바꾼다.
+              e.target.classList.remove('far')
+              e.target.classList.add('fas')
+            } else{
+              e.target.classList.remove('fas')
+              e.target.classList.add('far')
+            }
+          })
+          .catch((error)=>{console.log(error)})
+        */
+      })
+    })
+  </script>
 {% endblock %}
